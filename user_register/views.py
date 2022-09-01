@@ -17,7 +17,7 @@ class RegisterView(APIView):
         return Response(serializer.data)
 
 
-class LoginView(APIView):
+class AuthenticateView(APIView):
     def post(self, request):
         email = request.data['email']
         password = request.data['password']
@@ -56,3 +56,23 @@ class LoginView(APIView):
         }
 
         return response
+
+
+class RetrieveView(APIView):
+    def get(self, request):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed(
+                'Token not found. Session may have expired. Please login again.')
+
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed(
+                'Token not found. Session may have expired. Please login again.')
+
+        user = User.objects.filter(id=payload['id']).first()
+        serializer = UserSerializer(user)
+
+        return Response(serializer.data)
