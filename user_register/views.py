@@ -135,3 +135,34 @@ class RetrieveAllView(APIView):
         serializer = UserSerializer(user, many=True)
 
         return Response(serializer.data)
+
+
+class UpdateView(APIView):
+    def post(self, request, id):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed(
+                'Token not found. Session may have expired. Please login again.')
+
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed(
+                'Token not found. Session may have expired. Please login again.')
+
+        # TODO Check if user is authorized to fetch such details
+
+        user = User.objects.filter(id=id).first()
+
+        if user is None:
+            raise ValidationError(
+                'Invalid User ID.')
+
+        # serializer = UserSerializer(user)
+
+        serializer = UserSerializer(
+            instance=user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)

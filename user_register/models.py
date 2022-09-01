@@ -10,6 +10,6 @@ class User(AbstractUser):
     last_name = models.CharField(max_length=255)
     email = models.CharField(max_length=255, unique=True)
     password = models.CharField(max_length=225)
-    mobile = models.CharField(max_length=13)
+    verified = models.BooleanField(default=False)
 
     REQUIRED_FIELDS = []
