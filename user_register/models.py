@@ -5,13 +5,12 @@ from django.contrib.auth.models import AbstractUser
 
 
 class User(AbstractUser):
+    username = models.CharField(max_length=255, unique=True)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     email = models.CharField(max_length=255, unique=True)
     password = models.CharField(max_length=225)
     mobile = models.CharField(max_length=13)
-    # username is required by AbstractUser, but we can override it.
-    username = None
 
-    USERNAME_FIELD = 'email'
+    # USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
