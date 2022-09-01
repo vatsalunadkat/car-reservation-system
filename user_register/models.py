@@ -12,5 +12,4 @@ class User(AbstractUser):
     password = models.CharField(max_length=225)
     mobile = models.CharField(max_length=13)
 
-    # USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []

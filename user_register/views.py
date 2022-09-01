@@ -1,6 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed, ValidationError
 from .serializers import UserSerializer
 from .models import User
 import jwt
@@ -58,7 +58,7 @@ class AuthenticateView(APIView):
         return response
 
 
-class RetrieveView(APIView):
+class WhoAmIView(APIView):
     def get(self, request):
         token = request.COOKIES.get('jwt')
 
@@ -86,3 +86,52 @@ class LogoutView(APIView):
             'message': 'Logout success.'
         }
         return response
+
+
+class RetrieveView(APIView):
+    def get(self, request, id):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed(
+                'Token not found. Session may have expired. Please login again.')
+
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed(
+                'Token not found. Session may have expired. Please login again.')
+
+        # TODO Check if user is authorized to fetch such details
+
+        user = User.objects.filter(id=id).first()
+
+        if user is None:
+            raise ValidationError(
+                'Invalid User ID.')
+
+        serializer = UserSerializer(user)
+
+        return Response(serializer.data)
+
+
+class RetrieveAllView(APIView):
+    def get(self, request):
+        token = request.COOKIES.get('jwt')
+
+        if not token:
+            raise AuthenticationFailed(
+                'Token not found. Session may have expired. Please login again.')
+
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed(
+                'Token not found. Session may have expired. Please login again.')
+
+        # TODO Check if user is authorized to fetch such details
+
+        user = User.objects.all()
+        serializer = UserSerializer(user, many=True)
+
+        return Response(serializer.data)
