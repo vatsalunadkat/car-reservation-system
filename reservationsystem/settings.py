@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'user_register',
     'vehicle_register',
+    'booking_engine',
 ]
 
 MIDDLEWARE = [
