@@ -1,8 +1,17 @@
+# This file contains the functions (i.e. logic) for the User API calls.
+#
+# @author Vatsal Unadkat
+# @date 09 Sept, 2022
+# @copyright None
+
+# Imports
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed, ValidationError
+
 from .serializers import UserSerializer
 from .models import User
+
 import jwt
 import datetime
 
@@ -14,7 +23,7 @@ class RegisterView(APIView):
         serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data)
+        return Response({'status': 'SUCCESS', 'message': 'User registered successfully.', 'data': serializer.data})
 
 
 class AuthenticateView(APIView):
@@ -29,13 +38,13 @@ class AuthenticateView(APIView):
         if user is None:
             # We do NOT clearly specify that ONLY the password is incorrect for security reasons.
             raise AuthenticationFailed(
-                'Incorrect email or password. Please try again.')
+                {'status': 'FAILED', 'message': 'Incorrect email or password. Please try again.'})
 
         # Check for password (after decoding)
         if not user.check_password(password):
             # We do NOT clearly specify that ONLY the password is incorrect for security reasons.
             raise AuthenticationFailed(
-                'Incorrect email or password. Please try again.')
+                {'status': 'FAILED', 'message': 'Incorrect email or password. Please try again.'})
 
         # Token expires in 60 min = 1 hr
         payload = {
@@ -52,6 +61,7 @@ class AuthenticateView(APIView):
         response.set_cookie(key='jwt', value=token, httponly=True)
 
         response.data = {
+            'Status': 'SUCCESS',
             'jwt': token
         }
 
@@ -64,27 +74,25 @@ class WhoAmIView(APIView):
 
         if not token:
             raise AuthenticationFailed(
-                'Token not found. Session may have expired. Please login again.')
+                {'status': 'FAILED', 'message': 'Token not found. Session may have expired. Please login again.'})
 
         try:
             payload = jwt.decode(token, 'secret', algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed(
-                'Token not found. Session may have expired. Please login again.')
+                {'status': 'FAILED', 'message': 'Token not found. Session may have expired. Please login again.'})
 
         user = User.objects.filter(id=payload['id']).first()
         serializer = UserSerializer(user)
 
-        return Response(serializer.data)
+        return Response({'status': 'SUCCESS', 'message': 'User data retrieved successfully.', 'data': serializer.data})
 
 
 class LogoutView(APIView):
     def post(self, request):
         response = Response()
         response.delete_cookie('jwt')
-        response.data = {
-            'message': 'Logout success.'
-        }
+        response.data = {'status': 'SUCCESS', 'message': 'Logout success.'}
         return response
 
 
@@ -94,13 +102,13 @@ class RetrieveView(APIView):
 
         if not token:
             raise AuthenticationFailed(
-                'Token not found. Session may have expired. Please login again.')
+                {'status': 'FAILED', 'message': 'Token not found. Session may have expired. Please login again.'})
 
         try:
             payload = jwt.decode(token, 'secret', algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed(
-                'Token not found. Session may have expired. Please login again.')
+                {'status': 'FAILED', 'message': 'Token not found. Session may have expired. Please login again.'})
 
         # TODO Check if user is authorized to fetch such details
 
@@ -108,11 +116,11 @@ class RetrieveView(APIView):
 
         if user is None:
             raise ValidationError(
-                'Invalid User ID.')
+                {'status': 'FAILED', 'message': 'Invalid user ID.'})
 
         serializer = UserSerializer(user)
 
-        return Response(serializer.data)
+        return Response({'status': 'SUCCESS', 'data': serializer.data})
 
 
 class RetrieveAllView(APIView):
@@ -121,20 +129,20 @@ class RetrieveAllView(APIView):
 
         if not token:
             raise AuthenticationFailed(
-                'Token not found. Session may have expired. Please login again.')
+                {'status': 'FAILED', 'message': 'Token not found. Session may have expired. Please login again.'})
 
         try:
             payload = jwt.decode(token, 'secret', algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed(
-                'Token not found. Session may have expired. Please login again.')
+                {'status': 'FAILED', 'message': 'Token not found. Session may have expired. Please login again.'})
 
         # TODO Check if user is authorized to fetch such details
 
         user = User.objects.all()
         serializer = UserSerializer(user, many=True)
 
-        return Response(serializer.data)
+        return Response({'status': 'SUCCESS', 'data': serializer.data})
 
 
 class UpdateView(APIView):
@@ -143,13 +151,13 @@ class UpdateView(APIView):
 
         if not token:
             raise AuthenticationFailed(
-                'Token not found. Session may have expired. Please login again.')
+                {'status': 'FAILED', 'message': 'Token not found. Session may have expired. Please login again.'})
 
         try:
             payload = jwt.decode(token, 'secret', algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed(
-                'Token not found. Session may have expired. Please login again.')
+                {'status': 'FAILED', 'message': 'Token not found. Session may have expired. Please login again.'})
 
         # TODO Check if user is authorized to fetch such details
 
@@ -157,13 +165,13 @@ class UpdateView(APIView):
 
         if user is None:
             raise ValidationError(
-                'Invalid User ID.')
+                {'status': 'FAILED', 'message': 'Invalid user ID.'})
 
         serializer = UserSerializer(
             instance=user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data)
+        return Response({'status': 'SUCCESS', 'data': serializer.data})
 
 
 class DeleteView(APIView):
@@ -172,13 +180,13 @@ class DeleteView(APIView):
 
         if not token:
             raise AuthenticationFailed(
-                'Token not found. Session may have expired. Please login again.')
+                {'status': 'FAILED', 'message': 'Token not found. Session may have expired. Please login again.'})
 
         try:
             payload = jwt.decode(token, 'secret', algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed(
-                'Token not found. Session may have expired. Please login again.')
+                {'status': 'FAILED', 'message': 'Token not found. Session may have expired. Please login again.'})
 
         # TODO Check if user is authorized to fetch such details
 
@@ -186,8 +194,8 @@ class DeleteView(APIView):
 
         if user is None:
             raise ValidationError(
-                'Invalid User ID.')
+                {'status': 'FAILED', 'message': 'Invalid user ID.'})
 
         user.delete()
 
-        return Response('Item successfully deleted!')
+        return Response({'status': 'SUCCESS', 'message': 'Item deleted successfully!'})

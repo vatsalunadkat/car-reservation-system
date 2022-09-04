@@ -1,9 +1,19 @@
+# This file contains the functions (i.e. logic) for the Vehicle API calls.
+#
+# @author Vatsal Unadkat
+# @date 09 Sept, 2022
+# @copyright None
+
+# Imports
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed, ValidationError
+
 from .serializers import VehicleSerializer
+
 from .models import Vehicle
 from user_register.models import User
+
 import jwt
 import datetime
 
@@ -15,7 +25,7 @@ class RegisterVehicleView(APIView):
         serializer = VehicleSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data)
+        return Response({'status': 'SUCCESS', 'message': 'Vehicle registered successfully.', "data": serializer.data})
 
 
 class RetrieveVehicleView(APIView):
@@ -24,13 +34,13 @@ class RetrieveVehicleView(APIView):
 
         if not token:
             raise AuthenticationFailed(
-                'Token not found. Session may have expired. Please login again.')
+                {'status': 'FAILED', 'message': 'Token not found. Session may have expired. Please login again.'})
 
         try:
             payload = jwt.decode(token, 'secret', algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed(
-                'Token not found. Session may have expired. Please login again.')
+                {'status': 'FAILED', 'message': 'Token not found. Session may have expired. Please login again.'})
 
         # TODO Check if user is authorized to fetch such details
 
@@ -38,17 +48,17 @@ class RetrieveVehicleView(APIView):
 
         if user is None:
             raise ValidationError(
-                'Invalid User ID.')
+                {'status': 'FAILED', 'message': 'Invalid user ID.'})
 
         vehicle = Vehicle.objects.filter(id=id).first()
 
         if vehicle is None:
             raise ValidationError(
-                'Invalid Vehicle ID.')
+                {'status': 'FAILED', 'message': 'Invalid vehicle ID.'})
 
         serializer = VehicleSerializer(vehicle)
 
-        return Response(serializer.data)
+        return Response({'status': 'SUCCESS', 'message': 'Vehicle data retrieved successfully.', "data": serializer.data})
 
 
 class UpdateVehicleView(APIView):
@@ -57,13 +67,12 @@ class UpdateVehicleView(APIView):
 
         if not token:
             raise AuthenticationFailed(
-                'Token not found. Session may have expired. Please login again.')
-
+                {'status': 'FAILED', 'message': 'Token not found. Session may have expired. Please login again.'})
         try:
             payload = jwt.decode(token, 'secret', algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed(
-                'Token not found. Session may have expired. Please login again.')
+                {'status': 'FAILED', 'message': 'Token not found. Session may have expired. Please login again.'})
 
         # TODO Check if user is authorized to fetch such details
 
@@ -71,19 +80,19 @@ class UpdateVehicleView(APIView):
 
         if user is None:
             raise ValidationError(
-                'Invalid User ID.')
+                {'status': 'FAILED', 'message': 'Invalid user ID.'})
 
         vehicle = Vehicle.objects.filter(id=id).first()
 
         if vehicle is None:
             raise ValidationError(
-                'Invalid Vehicle ID.')
+                {'status': 'FAILED', 'message': 'Invalid vehicle ID.'})
 
         serializer = VehicleSerializer(
             instance=vehicle, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data)
+        return Response({'status': 'SUCCESS', 'message': 'Vehicle data updated successfully.', "data": serializer.data})
 
 
 class DeleteVehicleView(APIView):
@@ -92,13 +101,13 @@ class DeleteVehicleView(APIView):
 
         if not token:
             raise AuthenticationFailed(
-                'Token not found. Session may have expired. Please login again.')
+                {'status': 'FAILED', 'message': 'Token not found. Session may have expired. Please login again.'})
 
         try:
             payload = jwt.decode(token, 'secret', algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed(
-                'Token not found. Session may have expired. Please login again.')
+                {'status': 'FAILED', 'message': 'Token not found. Session may have expired. Please login again.'})
 
         # TODO Check if user is authorized to fetch such details
 
@@ -106,14 +115,14 @@ class DeleteVehicleView(APIView):
 
         if user is None:
             raise ValidationError(
-                'Invalid User ID.')
+                {'status': 'FAILED', 'message': 'Invalid user ID.'})
 
         vehicle = Vehicle.objects.filter(id=id).first()
 
         if vehicle is None:
             raise ValidationError(
-                'Invalid Vehicle ID.')
+                {'status': 'FAILED', 'message': 'Invalid vehicle ID.'})
 
         vehicle.delete()
 
-        return Response('Item successfully deleted!')
+        return Response({'status': 'SUCCESS', "message": 'Vehicle deleted successfully!'})
