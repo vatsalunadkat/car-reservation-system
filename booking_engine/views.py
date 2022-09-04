@@ -41,7 +41,8 @@ class RegisterBookingView(APIView):
                 {'status': 'FAILED', 'message': 'Token not found. Session may have expired. Please login again.'})
 
         try:
-            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+            payload = jwt.decode(
+                token, 'ridecell_secret_key', algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed(
                 {'status': 'FAILED', 'message': 'Token not found. Session may have expired. Please login again.'})
@@ -100,7 +101,8 @@ class RetrieveBookingView(APIView):
                 {'status': 'FAILED', 'message': 'Token not found. Session may have expired. Please login again.'})
 
         try:
-            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+            payload = jwt.decode(
+                token, 'ridecell_secret_key', algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed(
                 {'status': 'FAILED', 'message': 'Token not found. Session may have expired. Please login again.'})
@@ -154,7 +156,8 @@ class UpdateBookingView(APIView):
                 {'status': 'FAILED', 'message': 'Token not found. Session may have expired. Please login again.'})
 
         try:
-            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+            payload = jwt.decode(
+                token, 'ridecell_secret_key', algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed(
                 {'status': 'FAILED', 'message': 'Token not found. Session may have expired. Please login again.'})
@@ -190,7 +193,8 @@ class CancelBookingView(APIView):
                 {'status': 'FAILED', 'message': 'Token not found. Session may have expired. Please login again.'})
 
         try:
-            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+            payload = jwt.decode(
+                token, 'ridecell_secret_key', algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed(
                 {'status': 'FAILED', 'message': 'Token not found. Session may have expired. Please login again.'})

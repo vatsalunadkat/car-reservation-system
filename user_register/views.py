@@ -53,7 +53,8 @@ class AuthenticateView(APIView):
             'iat': datetime.datetime.utcnow()
         }
 
-        token = jwt.encode(payload, 'secret',
+        # Ideally we should save the 'ridecell_secret_key' in the .env file, but as it is a sample assignment I will leave it as is.
+        token = jwt.encode(payload, 'ridecell_secret_key',
                            algorithm='HS256')
 
         response = Response()
@@ -77,7 +78,8 @@ class WhoAmIView(APIView):
                 {'status': 'FAILED', 'message': 'Token not found. Session may have expired. Please login again.'})
 
         try:
-            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+            payload = jwt.decode(
+                token, 'ridecell_secret_key', algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed(
                 {'status': 'FAILED', 'message': 'Token not found. Session may have expired. Please login again.'})
@@ -105,7 +107,8 @@ class RetrieveView(APIView):
                 {'status': 'FAILED', 'message': 'Token not found. Session may have expired. Please login again.'})
 
         try:
-            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+            payload = jwt.decode(
+                token, 'ridecell_secret_key', algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed(
                 {'status': 'FAILED', 'message': 'Token not found. Session may have expired. Please login again.'})
@@ -132,7 +135,8 @@ class RetrieveAllView(APIView):
                 {'status': 'FAILED', 'message': 'Token not found. Session may have expired. Please login again.'})
 
         try:
-            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+            payload = jwt.decode(
+                token, 'ridecell_secret_key', algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed(
                 {'status': 'FAILED', 'message': 'Token not found. Session may have expired. Please login again.'})
@@ -154,7 +158,8 @@ class UpdateView(APIView):
                 {'status': 'FAILED', 'message': 'Token not found. Session may have expired. Please login again.'})
 
         try:
-            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+            payload = jwt.decode(
+                token, 'ridecell_secret_key', algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed(
                 {'status': 'FAILED', 'message': 'Token not found. Session may have expired. Please login again.'})
@@ -183,7 +188,8 @@ class DeleteView(APIView):
                 {'status': 'FAILED', 'message': 'Token not found. Session may have expired. Please login again.'})
 
         try:
-            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+            payload = jwt.decode(
+                token, 'ridecell_secret_key', algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed(
                 {'status': 'FAILED', 'message': 'Token not found. Session may have expired. Please login again.'})
