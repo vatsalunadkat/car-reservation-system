@@ -49,7 +49,7 @@ class RegisterBookingView(APIView):
         # TODO Check if user is authorized to fetch such details
 
         # Check if user is valid
-        user = User.objects.filter(id=payload['id']).first()
+        user = User.objects.filter(id=payload['id'], verified=True).first()
 
         if user is None:
             raise ValidationError(
